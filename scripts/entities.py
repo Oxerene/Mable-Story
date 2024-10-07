@@ -26,8 +26,10 @@ class PhysicsEntity:
             if entity_rect.colliderect(rect):
                 if frame_movement[0] > 0:
                     entity_rect.right = rect.left
+                    self.collisions['right'] = True
                 if frame_movement[0] < 0:
                     entity_rect.left = rect.right
+                    self.collisions['left'] = True
                 self.pos[0] = entity_rect.x
                        
         self.pos[1] += frame_movement[1] #y-axis
@@ -36,12 +38,17 @@ class PhysicsEntity:
             if entity_rect.colliderect(rect):
                 if frame_movement[1] > 0:
                     entity_rect.bottom = rect.top
+                    self.collisions['down'] = True
                 if frame_movement[1] < 0:
                     entity_rect.top = rect.bottom
+                    self.collisions['up'] = True
                 self.pos[1] = entity_rect.y
         
         self.velocity[1] = min(5, self.velocity[1] + 0.1) # increments vel. by 0.5 but stops at 7 which is max vel.
-    
+
+        if self.collisions['down'] or self.collisions['up']:
+            self.velocity[1] = 0
+        
     def render(self, surf):
         surf.blit(self.game.assets['player'], self.pos)
         

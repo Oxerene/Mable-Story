@@ -32,6 +32,7 @@ class Tilemap:
             if tile['type'] in PHYSICS_TILES:
                 rects.append(Rect(tile['pos'][0] * self.tile_size, tile['pos'][1] * self.tile_size, self.tile_size, self.tile_size))
         return rects
+    
     def render(self, surf):
         for tile in self.offgrid_tiles:
             surf.blit(self.game.assets[tile['type']][tile['variant']], tile['pos'])
