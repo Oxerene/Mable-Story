@@ -1,6 +1,6 @@
 import pygame, sys
-from scripts.entities import PhysicsEntity
-from scripts.utils import load_image, load_images
+from scripts.entities import PhysicsEntity, Player
+from scripts.utils import load_image, load_images, Animation
 from scripts.tilemap import Tilemap
 from scripts.clouds import Clouds
 
@@ -20,14 +20,18 @@ class Game:
         self.assets = {
             'grass' : load_images('platform/grass'),
             'stone' : load_images('platform/stone'),
-            'player' : load_image('entities/player/knight.png'),
             'background' : load_image('background/bg.png'),
-            'clouds' : load_images('clouds')
+            'clouds' : load_images('clouds'),
+            'player/idle' : Animation(load_images('entities/player/idle'), img_dur=10),
+            'player/run' : Animation(load_images('entities/player/run'), img_dur=6),
+            'player/roll' : Animation(load_images('entities/player/roll')),
+            'player/jump' : Animation(load_images('entities/player/jump'))
         }
+        
         
         self.clouds = Clouds(self.assets['clouds'])
         
-        self.player = PhysicsEntity(self, 'player', (50, 50), (13, 19))
+        self.player = Player(self, (50, 50), (13, 19))
         
         self.tilemap = Tilemap(self, tile_size=16)
 
@@ -72,6 +76,6 @@ class Game:
             
             self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), (0, 0))
             pygame.display.update()         #calling update function to update the screen frequently to avoid black screen
-            self.clock.tick(90)             #tries to run the loop at fixed fps
+            self.clock.tick(60)             #tries to run the loop at fixed fps
 
 Game().run()
