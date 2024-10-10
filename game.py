@@ -36,8 +36,6 @@ class Game:
             self.player.update(self.tilemap, (self.movement[1] - self.movement[0], 0))
             self.player.render(self.display)
             
-            print(self.tilemap.physics_rects_around(self.player.pos))
-            
             for event in pygame.event.get(): #interact with the windows and get inputs
                 #checks to see if we pressed X(cross) on windows
                 if event.type == pygame.QUIT: 
@@ -50,7 +48,9 @@ class Game:
                         self.movement[0] = True
                     if event.key == pygame.K_RIGHT or event.key == pygame.K_d:
                         self.movement[1] = True
-                
+                    if event.key == pygame.K_UP or event.key == pygame.K_SPACE:
+                        self.player.velocity[1] = -3
+                    
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_LEFT or event.key == pygame.K_a:   
                         self.movement[0] = False
