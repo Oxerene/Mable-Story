@@ -10,7 +10,10 @@ class Game:
 
         pygame.display.set_caption("Mable Story")
         self.screen = pygame.display.set_mode((1280, 720)) # resolution of the game
-        self.display = pygame.Surface((640, 360))
+        self.display = pygame.Surface((640, 360), pygame.SRCALPHA)
+        self.display_2 = pygame.Surface((640, 360))
+        
+        
         self.clock = pygame.time.Clock() # creates an object of clock to maintain fps and time delay required to update display accordingly
         
         # initialising default position for the image (easy to change later with movement)
@@ -34,6 +37,18 @@ class Game:
             'enemy/attack' : Animation(load_images('entities/enemy/attack'), img_dur = 7),
             'enemy/death' : load_image('entities/enemy/death/03.png')
         }
+        
+        self.sfx = {
+            'jump' : pygame.mixer.Sound('data/sfx/jump.wav'),
+            'slash' : pygame.mixer.Sound('data/sfx/slash.mp3'),
+            'hit' : pygame.mixer.Sound('data/sfx/hit.wav'),
+            'ambience' : pygame.mixer.Sound('data/sfx/ambience.wav'),
+        }
+        
+        self.sfx['ambience'].set_volume(0.2)
+        self.sfx['hit'].set_volume(0.8)
+        self.sfx['slash'].set_volume(0.1)
+        self.sfx['jump'].set_volume(0.7)
             
         self.clouds = Clouds(self.assets['clouds'])
         
@@ -60,15 +75,22 @@ class Game:
         self.transition = -30
 
     def run(self):
+        
+        pygame.mixer.music.load('data/music.wav')
+        pygame.mixer.music.set_volume(0.5)
+        pygame.mixer.music.play(-1)
+        
+        
         #game loop
         while True:
-            self.display.blit(self.assets['background'], (0, 0))       #refreshes the screen to default display as well as remove trail issue with movement
+            self.display.fill((0, 0, 0, 0))
+            self.display_2.blit(self.assets['background'], (0, 0))       #refreshes the screen to default display as well as remove trail issue with movement
             
             self.screenshake = max(0, self.screenshake - 1)
             
             if not len(self.enemies):
                 self.transition += 1
-                if self.transition > 30:
+                if self.transition > 60:
                     self.level = min(self.level + 1, len(os.listdir('data/maps')) - 1)
                     self.load_level(self.level)
             if self.transition < 0:
@@ -87,7 +109,7 @@ class Game:
             render_scroll = (int(self.scroll[0]), int(self.scroll[1]))
             
             self.clouds.update()
-            self.clouds.render(self.display, offset=render_scroll)
+            self.clouds.render(self.display_2, offset=render_scroll)
             
             self.tilemap.render(self.display, offset = render_scroll)
 
@@ -95,6 +117,7 @@ class Game:
                 kill = enemy.update(self.tilemap, (0, 0))
                 enemy.render(self.display, offset=render_scroll)
                 if kill:
+                    self.sfx['hit'].play()
                     self.enemies.remove(enemy)
                     self.dead = 0
 
@@ -106,6 +129,11 @@ class Game:
                     self.screenshake = max(16, self.screenshake)
 
             
+            display_mask = pygame.mask.from_surface(self.display)
+            displa_sillhouette = display_mask.to_surface(setcolor=(0, 0, 0, 180), unsetcolor=(0, 0, 0, 0))
+            for offset in [(-1, 0), (1, 0), (0, -1), (1, 1)]:
+                self.display_2.blit(displa_sillhouette, offset)
+            
             for event in pygame.event.get(): #interact with the windows and get inputs
                 #checks to see if we pressed X(cross) on windows
                 if event.type == pygame.QUIT: 
@@ -114,6 +142,7 @@ class Game:
                 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
+                        self.sfx['slash'].play()
                         self.player.attack()
                 if event.type == pygame.MOUSEBUTTONUP:
                     if event.button == 1:
@@ -140,8 +169,10 @@ class Game:
                 transition_surf.set_colorkey((255, 255, 255))
                 self.display.blit(transition_surf, (0, 0))
             
+            self.display_2.blit(self.display, (0, 0))
+            
             screenshake_offset = (random.random() * self.screenshake - self.screenshake / 2, random.random() * self.screenshake - self.screenshake / 2 )
-            self.screen.blit(pygame.transform.scale(self.display, self.screen.get_size()), screenshake_offset)
+            self.screen.blit(pygame.transform.scale(self.display_2, self.screen.get_size()), screenshake_offset)
             pygame.display.update()         #calling update function to update the screen frequently to avoid black screen
             self.clock.tick(60)             #tries to run the loop at fixed fps
 

@@ -166,9 +166,11 @@ class Player(PhysicsEntity):
         if self.collisions['down']:
             self.air_time = 0
             self.jumps = 2
+        
         attack_time = 60
         if self.attacks > 0:
             self.set_action('attack')
+            self.game.sfx['slash'].play()
         elif self.jumps == 0 :
             self.set_action('roll')    
         elif self.air_time > 4:
@@ -180,10 +182,12 @@ class Player(PhysicsEntity):
 
     def jump(self):
         if self.jumps == 1:
+            self.game.sfx['jump'].play()
             self.velocity[1] = -2
             self.jumps -= 1
             self.air_time = 5 #immediately switch to jump animation
         elif self.jumps == 2:
+            self.game.sfx['jump'].play()
             self.velocity[1] = -3.5
             self.jumps -= 1
             self.air_time = 5
